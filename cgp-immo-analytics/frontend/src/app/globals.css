@@ -1,21 +1,285 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================
+   CSS Custom Properties
+   ============================ */
 :root {
-  --foreground: #171717;
-  --background: #f8fafc;
+  --bg: #0B1120;
+  --bg-surface: #131825;
+  --bg-surface-hover: #1a2035;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #475569;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.12);
+  --accent: #2563EB;
+  --accent-dark: #1E40AF;
+  --accent-glow: rgba(37, 99, 235, 0.15);
+  --success: #10B981;
+  --danger: #EF4444;
+  --gold: #C9A84C;
+  --compliance: #6366F1;
+}
+
+/* ============================
+   Base Styles
+   ============================ */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Leaflet fix pour Next.js */
+::selection {
+  background: rgba(37, 99, 235, 0.3);
+  color: #fff;
+}
+
+/* ============================
+   Typography — Financial Numbers
+   ============================ */
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+  font-family: 'JetBrains Mono', 'DM Mono', monospace;
+}
+
+.text-positive {
+  color: var(--success);
+}
+
+.text-negative {
+  color: var(--danger);
+}
+
+/* ============================
+   Glass Card
+   ============================ */
+.glass-card {
+  background: rgba(19, 24, 37, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 250ms ease;
+}
+
+.glass-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================
+   Navbar Frosted
+   ============================ */
+.navbar-frosted {
+  background: rgba(11, 17, 32, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 300ms ease;
+}
+
+.navbar-frosted.scrolled {
+  border-bottom-color: var(--border);
+}
+
+/* ============================
+   Buttons
+   ============================ */
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  transition: all 200ms ease;
+  font-size: 15px;
+}
+
+.btn-primary:hover {
+  background: #3B82F6;
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 200ms ease;
+  font-size: 15px;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================
+   Score Gauge
+   ============================ */
+.score-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.score-excellent { background: rgba(37, 99, 235, 0.15); color: #60a5fa; }
+.score-good { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.score-average { background: rgba(234, 179, 8, 0.15); color: #facc15; }
+.score-poor { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+/* ============================
+   Scroll Reveal
+   ============================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* stagger children */
+.reveal-stagger > .reveal:nth-child(1) { transition-delay: 0ms; }
+.reveal-stagger > .reveal:nth-child(2) { transition-delay: 100ms; }
+.reveal-stagger > .reveal:nth-child(3) { transition-delay: 200ms; }
+.reveal-stagger > .reveal:nth-child(4) { transition-delay: 300ms; }
+.reveal-stagger > .reveal:nth-child(5) { transition-delay: 400ms; }
+.reveal-stagger > .reveal:nth-child(6) { transition-delay: 500ms; }
+
+/* ============================
+   Shimmer Badge
+   ============================ */
+.shimmer-badge {
+  background: linear-gradient(
+    90deg,
+    rgba(37, 99, 235, 0.1) 0%,
+    rgba(99, 102, 241, 0.2) 50%,
+    rgba(37, 99, 235, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+/* ============================
+   Dot Grid Background
+   ============================ */
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ============================
+   Radial Glow
+   ============================ */
+.hero-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ============================
+   Table Styles
+   ============================ */
+.fund-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.fund-table thead th {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.fund-table thead th:last-child,
+.fund-table tbody td:last-child {
+  text-align: right;
+}
+
+.fund-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 150ms ease;
+}
+
+.fund-table tbody tr:hover {
+  background: var(--bg-surface-hover);
+}
+
+.fund-table tbody td {
+  padding: 14px 16px;
+  font-size: 14px;
+}
+
+/* ============================
+   Pricing Card Highlight
+   ============================ */
+.pricing-highlight {
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 40px rgba(37, 99, 235, 0.15);
+  position: relative;
+}
+
+.pricing-highlight::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 13px;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent), var(--compliance));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* ============================
+   Leaflet fix
+   ============================ */
 .leaflet-container {
   width: 100%;
   height: 100%;
   z-index: 1;
+}
+
+/* ============================
+   Reduced Motion
+   ============================ */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { transition: none; opacity: 1; transform: none; }
+  .shimmer-badge { animation: none; }
+  html { scroll-behavior: auto; }
 }
