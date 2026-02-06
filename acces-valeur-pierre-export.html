@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CGP Immo Analytics — Accès Valeur Pierre</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+          400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+          800: '#1e40af', 900: '#1e3a8a',
+        }
+      }
+    }
+  }
+}
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+  .progress-bar { height: 8px; border-radius: 9999px; background: #e2e8f0; overflow: hidden; }
+  .progress-bar .fill { height: 100%; border-radius: 9999px; transition: width 1s ease; }
+  .risk-indicator { display: flex; gap: 4px; align-items: center; }
+  .risk-indicator .dot { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: white; }
+</style>
+</head>
+<body class="min-h-screen bg-slate-50">
+
+<!-- Navigation -->
+<nav class="bg-white border-b border-slate-200 px-6 py-3 sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+        <span class="text-white font-bold text-sm">IA</span>
+      </div>
+      <span class="font-semibold text-lg text-slate-900">CGP Immo Analytics</span>
+      <span class="text-xs bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full ml-2">Beta</span>
+    </div>
+    <div class="flex items-center gap-6 text-sm">
+      <a href="#dashboard" class="text-primary-600 font-medium">Dashboard</a>
+      <a href="#fonds" class="text-slate-600 hover:text-primary-600 transition">Fonds</a>
+      <a href="#patrimoine" class="text-slate-600 hover:text-primary-600 transition">Patrimoine</a>
+      <a href="#marche" class="text-slate-600 hover:text-primary-600 transition">Marché</a>
+    </div>
+  </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+  <!-- ================================================================== -->
+  <!-- DASHBOARD -->
+  <!-- ================================================================== -->
+  <section id="dashboard">
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+      <p class="text-slate-500 mt-1">Vue d'ensemble — Accès Valeur Pierre (Rapport Annuel 2024)</p>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition">
+        <p class="text-sm text-slate-500 mb-1">Capitalisation</p>
+        <p class="text-3xl font-bold text-slate-900">1,77 Md&euro;</p>
+        <p class="text-xs text-slate-400 mt-1">67 immeubles &middot; 193 402 m&sup2;</p>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition">
+        <p class="text-sm text-slate-500 mb-1">Taux de Distribution</p>
+        <p class="text-3xl font-bold text-slate-900">3,53%</p>
+        <p class="text-xs text-slate-400 mt-1">29,66 &euro;/part &middot; Prix: 765 &euro;</p>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition">
+        <p class="text-sm text-slate-500 mb-1">Taux d'Occupation (TOF)</p>
+        <p class="text-3xl font-bold text-orange-600">89,4%</p>
+        <p class="text-xs text-slate-400 mt-1">vs. 91,0% en 2023 &middot; -1,6 pts</p>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition">
+        <p class="text-sm text-slate-500 mb-1">Nombre d'Associés</p>
+        <p class="text-3xl font-bold text-slate-900">25 501</p>
+        <p class="text-xs text-slate-400 mt-1">2 391 334 parts en circulation</p>
+      </div>
+    </div>
+
+    <!-- Second row KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-xl border border-slate-200 p-6">
+        <p class="text-sm text-slate-500 mb-1">Valeur de Reconstitution</p>
+        <p class="text-2xl font-bold text-slate-900">773,74 &euro;/part</p>
+        <p class="text-xs text-red-500 mt-1">-4,40% vs. 2023 (809,36 &euro;)</p>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-6">
+        <p class="text-sm text-slate-500 mb-1">Valeur de Réalisation</p>
+        <p class="text-2xl font-bold text-slate-900">636,10 &euro;/part</p>
+        <p class="text-xs text-red-500 mt-1">-4,24% vs. 2023 (664,26 &euro;)</p>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-6">
+        <p class="text-sm text-slate-500 mb-1">Prix de Retrait</p>
+        <p class="text-2xl font-bold text-slate-900">696,69 &euro;/part</p>
+        <p class="text-xs text-slate-400 mt-1">Commission souscription : 8,93% HT</p>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 p-6">
+        <p class="text-sm text-slate-500 mb-1">Report &agrave; Nouveau</p>
+        <p class="text-2xl font-bold text-slate-900">10,93 &euro;/part</p>
+        <p class="text-xs text-orange-500 mt-1">En baisse vs. 12,98 &euro; en 2023</p>
+      </div>
+    </div>
+
+    <!-- Rendement Global + Risque -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Rendement Global -->
+      <div class="bg-white rounded-xl border border-slate-200 p-6">
+        <h2 class="font-semibold text-slate-900 mb-4">Rendement Global Immobilier 2024</h2>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600">Taux de distribution (a)</span>
+            <span class="font-semibold text-green-600">+3,53%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600">Variation valeur de réalisation (b)</span>
+            <span class="font-semibold text-red-600">-4,24%</span>
+          </div>
+          <hr class="border-slate-200">
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-medium text-slate-900">Rendement global (a)+(b)</span>
+            <span class="font-bold text-lg text-red-600">-0,71%</span>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-slate-100">
+          <div class="flex gap-8">
+            <div>
+              <p class="text-xs text-slate-400">TRI 5 ans</p>
+              <p class="text-lg font-bold text-primary-600">+5,29%</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400">TRI 10 ans</p>
+              <p class="text-lg font-bold text-primary-600">+7,92%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicateur de Risque -->
+      <div class="bg-white rounded-xl border border-slate-200 p-6">
+        <h2 class="font-semibold text-slate-900 mb-4">Indicateur de Risque (SRI)</h2>
+        <div class="risk-indicator justify-center mb-4">
+          <div class="dot bg-green-500">1</div>
+          <div class="dot bg-green-400">2</div>
+          <div class="dot bg-yellow-400 ring-4 ring-yellow-200 scale-110 text-yellow-900">3</div>
+          <div class="dot bg-orange-400">4</div>
+          <div class="dot bg-orange-500">5</div>
+          <div class="dot bg-red-500">6</div>
+          <div class="dot bg-red-700">7</div>
+        </div>
+        <p class="text-center text-sm text-slate-500 mb-4">Risque <strong>3/7</strong> — Modéré</p>
+        <div class="bg-slate-50 rounded-lg p-3">
+          <p class="text-xs text-slate-500">L'indicateur synthétique de risque et de rendement est de 3 sur une échelle de 1 à 7. Les placements ayant le plus fort potentiel de performance sont également les plus risqués.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Répartitions -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Répartition Géographique -->
+      <div class="bg-white rounded-xl border border-slate-200 p-6">
+        <h2 class="font-semibold text-slate-900 mb-4">Répartition Géographique</h2>
+        <div class="space-y-3">
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-600">Paris intra-muros</span>
+              <span class="font-medium text-slate-900">73,6% <span class="text-slate-400">(46 immeubles)</span></span>
+            </div>
+            <div class="progress-bar"><div class="fill bg-primary-600" style="width:73.6%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-600">Région Parisienne</span>
+              <span class="font-medium text-slate-900">21,3% <span class="text-slate-400">(17 immeubles)</span></span>
+            </div>
+            <div class="progress-bar"><div class="fill bg-primary-400" style="width:21.3%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-600">Autres régions</span>
+              <span class="font-medium text-slate-900">5,0% <span class="text-slate-400">(4 immeubles)</span></span>
+            </div>
+            <div class="progress-bar"><div class="fill bg-primary-300" style="width:5%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Répartition par type -->
+      <div class="bg-white rounded-xl border border-slate-200 p-6">
+        <h2 class="font-semibold text-slate-900 mb-4">Répartition par Type d'Actif</h2>
+        <div class="space-y-3">
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-600">Bureaux</span>
+              <span class="font-medium text-slate-900">92,4% <span class="text-slate-400">(59 actifs &middot; 178 866 m&sup2;)</span></span>
+            </div>
+            <div class="progress-bar"><div class="fill bg-blue-500" style="width:92.4%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-600">Commerces</span>
+              <span class="font-medium text-slate-900">7,6% <span class="text-slate-400">(8 actifs &middot; 14 537 m&sup2;)</span></span>
+            </div>
+            <div class="progress-bar"><div class="fill bg-emerald-500" style="width:7.6%"></div></div>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-3 gap-4 text-center">
+          <div>
+            <p class="text-xs text-slate-400">Surface totale</p>
+            <p class="font-semibold text-slate-900">193 402 m&sup2;</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400">Prix acquisition</p>
+            <p class="font-semibold text-slate-900">1 326 M&euro;</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400">Valeur vénale</p>
+            <p class="font-semibold text-slate-900">1 770 M&euro;</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- FICHE FONDS -->
+  <!-- ================================================================== -->
+  <section id="fonds" class="mt-12">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900">Fiche Fonds</h1>
+      <p class="text-slate-500 text-sm mt-1">Accès Valeur Pierre — SCPI de bureaux &agrave; capital variable</p>
+    </div>
+
+    <!-- Fund Header -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="flex items-center gap-3 mb-2">
+            <h2 class="text-xl font-bold text-slate-900">Accès Valeur Pierre</h2>
+            <span class="badge bg-blue-100 text-blue-700">SCPI</span>
+            <span class="badge bg-green-100 text-green-700">Label ISR</span>
+            <span class="badge bg-purple-100 text-purple-700">Art. 8 SFDR</span>
+          </div>
+          <p class="text-sm text-slate-500">
+            BNP Paribas REIM France &middot; Créée il y a 60+ ans &middot; Capital variable &middot; Visa AMF n°22-14
+          </p>
+        </div>
+        <div class="text-right">
+          <p class="text-xs text-slate-400">Capital social</p>
+          <p class="font-semibold text-slate-900">547 615 486 &euro;</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tableau des données -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th class="text-left px-4 py-3 font-medium text-slate-600">Fonds</th>
+              <th class="text-left px-4 py-3 font-medium text-slate-600">Type</th>
+              <th class="text-left px-4 py-3 font-medium text-slate-600">Catégorie</th>
+              <th class="text-left px-4 py-3 font-medium text-slate-600">Société</th>
+              <th class="text-right px-4 py-3 font-medium text-slate-600">Prix part</th>
+              <th class="text-right px-4 py-3 font-medium text-slate-600">TD</th>
+              <th class="text-right px-4 py-3 font-medium text-slate-600">TOF</th>
+              <th class="text-right px-4 py-3 font-medium text-slate-600">Capitalisation</th>
+              <th class="text-right px-4 py-3 font-medium text-slate-600">Dette</th>
+              <th class="text-center px-4 py-3 font-medium text-slate-600">ESG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-slate-100 bg-primary-50">
+              <td class="px-4 py-3 font-medium text-slate-900">Accès Valeur Pierre</td>
+              <td class="px-4 py-3"><span class="badge bg-blue-100 text-blue-700">SCPI</span></td>
+              <td class="px-4 py-3 text-slate-600">Bureaux</td>
+              <td class="px-4 py-3 text-slate-600">BNP Paribas REIM</td>
+              <td class="px-4 py-3 text-right text-slate-900">765,00 &euro;</td>
+              <td class="px-4 py-3 text-right text-slate-900">3,53%</td>
+              <td class="px-4 py-3 text-right"><span class="text-orange-600">89,4%</span></td>
+              <td class="px-4 py-3 text-right text-slate-900">1,8 Md&euro;</td>
+              <td class="px-4 py-3 text-right text-slate-900">292,8 M&euro;</td>
+              <td class="px-4 py-3 text-center">&#127793;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Historique des prix / distributions -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <h2 class="font-semibold text-slate-900 mb-4">Historique</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="border-b border-slate-200">
+            <tr>
+              <th class="text-left px-3 py-2 font-medium text-slate-600">Année</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">Prix souscription</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">Dividende/part</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">TD / DVM</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">Report &agrave; nouveau</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">Nb associés</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">Nb parts</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 font-medium">2020</td>
+              <td class="px-3 py-2 text-right">645,00 &euro;</td>
+              <td class="px-3 py-2 text-right">24,00 &euro;</td>
+              <td class="px-3 py-2 text-right">3,72%</td>
+              <td class="px-3 py-2 text-right">18,91 &euro;</td>
+              <td class="px-3 py-2 text-right text-slate-400">—</td>
+              <td class="px-3 py-2 text-right text-slate-400">—</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 font-medium">2021</td>
+              <td class="px-3 py-2 text-right">645,00 &euro;</td>
+              <td class="px-3 py-2 text-right">24,92 &euro;</td>
+              <td class="px-3 py-2 text-right">3,86%</td>
+              <td class="px-3 py-2 text-right">18,67 &euro;</td>
+              <td class="px-3 py-2 text-right text-slate-400">—</td>
+              <td class="px-3 py-2 text-right text-slate-400">—</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 font-medium">2022</td>
+              <td class="px-3 py-2 text-right">840,00 &euro;</td>
+              <td class="px-3 py-2 text-right">26,25 &euro;</td>
+              <td class="px-3 py-2 text-right">4,45%</td>
+              <td class="px-3 py-2 text-right">15,97 &euro;</td>
+              <td class="px-3 py-2 text-right">25 007</td>
+              <td class="px-3 py-2 text-right">2 390 358</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 font-medium">2023</td>
+              <td class="px-3 py-2 text-right">840,00 &euro;</td>
+              <td class="px-3 py-2 text-right">29,44 &euro;</td>
+              <td class="px-3 py-2 text-right">3,50%</td>
+              <td class="px-3 py-2 text-right">12,98 &euro;</td>
+              <td class="px-3 py-2 text-right">25 359</td>
+              <td class="px-3 py-2 text-right">2 391 334</td>
+            </tr>
+            <tr class="bg-primary-50 font-medium">
+              <td class="px-3 py-2 font-bold">2024</td>
+              <td class="px-3 py-2 text-right">765,00 &euro;</td>
+              <td class="px-3 py-2 text-right">29,66 &euro;</td>
+              <td class="px-3 py-2 text-right">3,53%</td>
+              <td class="px-3 py-2 text-right">10,93 &euro;</td>
+              <td class="px-3 py-2 text-right">25 501</td>
+              <td class="px-3 py-2 text-right">2 391 334</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Compte de résultat -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <h2 class="font-semibold text-slate-900 mb-4">Compte de Résultat Agrégé 2024</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="border-b border-slate-200">
+            <tr>
+              <th class="text-left px-3 py-2 font-medium text-slate-600">Poste</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">Direct (M&euro;)</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">Filiales (M&euro;)</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">Total (M&euro;)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-slate-50 bg-green-50">
+              <td class="px-3 py-2 font-medium text-green-800">Loyers</td>
+              <td class="px-3 py-2 text-right">80,3</td>
+              <td class="px-3 py-2 text-right">1,9</td>
+              <td class="px-3 py-2 text-right font-semibold">82,3</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 text-slate-600">Charges non récupérables</td>
+              <td class="px-3 py-2 text-right text-red-600">-7,9</td>
+              <td class="px-3 py-2 text-right text-red-600">-0,3</td>
+              <td class="px-3 py-2 text-right text-red-600 font-semibold">-8,3</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 text-slate-600">Travaux &amp; gros entretien</td>
+              <td class="px-3 py-2 text-right text-red-600">-0,6</td>
+              <td class="px-3 py-2 text-right">—</td>
+              <td class="px-3 py-2 text-right text-red-600 font-semibold">-0,6</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 text-slate-600">Commission de gestion SGP</td>
+              <td class="px-3 py-2 text-right text-red-600">-8,1</td>
+              <td class="px-3 py-2 text-right">—</td>
+              <td class="px-3 py-2 text-right text-red-600 font-semibold">-8,1</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 text-slate-600">Autres charges d'exploitation</td>
+              <td class="px-3 py-2 text-right text-red-600">-3,0</td>
+              <td class="px-3 py-2 text-right text-red-600">-0,1</td>
+              <td class="px-3 py-2 text-right text-red-600 font-semibold">-3,0</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 text-slate-600">Charges financières (intérêts)</td>
+              <td class="px-3 py-2 text-right text-red-600">-7,5</td>
+              <td class="px-3 py-2 text-right">—</td>
+              <td class="px-3 py-2 text-right text-red-600 font-semibold">-7,5</td>
+            </tr>
+            <tr class="border-b border-slate-50 bg-blue-50">
+              <td class="px-3 py-2 text-slate-600">Produits financiers</td>
+              <td class="px-3 py-2 text-right">1,4</td>
+              <td class="px-3 py-2 text-right">0,1</td>
+              <td class="px-3 py-2 text-right font-semibold">1,5</td>
+            </tr>
+            <tr class="bg-slate-100">
+              <td class="px-3 py-2 font-bold text-slate-900">Résultat net</td>
+              <td class="px-3 py-2 text-right font-bold">55,9</td>
+              <td class="px-3 py-2 text-right font-bold">1,3</td>
+              <td class="px-3 py-2 text-right font-bold text-primary-700">57,2</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="text-xs text-slate-400 mt-3">Résultat net : 23,93 &euro;/part &middot; Prélèvement sur report &agrave; nouveau : 2,05 &euro;/part</p>
+      </div>
+    </div>
+
+    <!-- Distribution détaillée -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <h2 class="font-semibold text-slate-900 mb-4">Détail de la Distribution 2024</h2>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="bg-slate-50 rounded-lg p-4 text-center">
+          <p class="text-xs text-slate-400 mb-1">Revenus fonciers</p>
+          <p class="text-lg font-bold text-slate-900">24,52 &euro;</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 text-center">
+          <p class="text-xs text-slate-400 mb-1">Revenus financiers</p>
+          <p class="text-lg font-bold text-slate-900">0,92 &euro;</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 text-center">
+          <p class="text-xs text-slate-400 mb-1">Prime de fusion (PV)</p>
+          <p class="text-lg font-bold text-slate-900">4,00 &euro;</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 text-center">
+          <p class="text-xs text-slate-400 mb-1">Fiscalité PV payée</p>
+          <p class="text-lg font-bold text-slate-900">0,22 &euro;</p>
+        </div>
+        <div class="bg-primary-50 rounded-lg p-4 text-center border-2 border-primary-200">
+          <p class="text-xs text-primary-600 mb-1 font-medium">Distribution brute</p>
+          <p class="text-lg font-bold text-primary-700">29,66 &euro;</p>
+        </div>
+      </div>
+      <div class="flex gap-6 mt-4 text-sm text-slate-500">
+        <span>Récurrente : <strong class="text-slate-700">86,4%</strong></span>
+        <span>Non récurrente : <strong class="text-slate-700">13,6%</strong></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- PATRIMOINE / ACTIFS -->
+  <!-- ================================================================== -->
+  <section id="patrimoine" class="mt-12">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900">Patrimoine Immobilier</h1>
+      <p class="text-slate-500 text-sm mt-1">67 immeubles &middot; 1 770 M&euro; de valeur vénale au 31/12/2024</p>
+    </div>
+
+    <!-- Endettement -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <h2 class="font-semibold text-slate-900 mb-4">Endettement &amp; Levier</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div class="bg-slate-50 rounded-lg p-4">
+          <p class="text-xs text-slate-400 mb-1">Dette financière totale</p>
+          <p class="text-xl font-bold text-slate-900">292,8 M&euro;</p>
+          <p class="text-xs text-slate-400">100% emprunts immobiliers</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4">
+          <p class="text-xs text-slate-400 mb-1">Taux moyen</p>
+          <p class="text-xl font-bold text-slate-900">2,4%</p>
+          <p class="text-xs text-slate-400">Taux fixe &middot; In fine</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4">
+          <p class="text-xs text-slate-400 mb-1">Levier AIFM (brut)</p>
+          <p class="text-xl font-bold text-slate-900">114%</p>
+          <p class="text-xs text-slate-400">Seuil substantiel : 300%</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4">
+          <p class="text-xs text-slate-400 mb-1">Levier AIFM (engagement)</p>
+          <p class="text-xl font-bold text-slate-900">119%</p>
+          <p class="text-xs text-slate-400">Neutre = 100%</p>
+        </div>
+      </div>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
+        Banques prêteuses : LCL (71 M&euro;), La Banque Postale (21,8 M&euro;), Deutsche PfandBriefbank (80 M&euro;), BayernLB + PBB (120 M&euro;).
+        Échéances : juin 2025 &agrave; sept. 2033. Lignes de crédit non tirées : 95 M&euro; (BECM).
+      </div>
+    </div>
+
+    <!-- Cessions 2024 -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <h2 class="font-semibold text-slate-900 mb-4">Cessions 2024</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="border-b border-slate-200">
+            <tr>
+              <th class="text-left px-3 py-2 font-medium text-slate-600">Adresse</th>
+              <th class="text-left px-3 py-2 font-medium text-slate-600">Nature</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">Surface (m&sup2;)</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">Prix net (M&euro;)</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2">2-4, rue Louis David — Paris 16<sup>e</sup></td>
+              <td class="px-3 py-2">Bureaux</td>
+              <td class="px-3 py-2 text-right">3 181</td>
+              <td class="px-3 py-2 text-right font-medium">27,8</td>
+              <td class="px-3 py-2 text-right text-slate-500">02/05/2024</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2">68, rue Marjolin — Levallois-Perret</td>
+              <td class="px-3 py-2">Bureaux</td>
+              <td class="px-3 py-2 text-right">4 910</td>
+              <td class="px-3 py-2 text-right font-medium">23,0</td>
+              <td class="px-3 py-2 text-right text-slate-500">30/10/2024</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2">105, av. Jules Guesde — Levallois-Perret</td>
+              <td class="px-3 py-2">Bureaux</td>
+              <td class="px-3 py-2 text-right">3 226</td>
+              <td class="px-3 py-2 text-right font-medium">13,5</td>
+              <td class="px-3 py-2 text-right text-slate-500">27/09/2024</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2">31, rue des Colonnes du Trône — Paris 12<sup>e</sup></td>
+              <td class="px-3 py-2">Bureaux</td>
+              <td class="px-3 py-2 text-right">1 243</td>
+              <td class="px-3 py-2 text-right font-medium">11,5</td>
+              <td class="px-3 py-2 text-right text-slate-500">04/06/2024</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2">Le Péripole — Fontenay-sous-Bois</td>
+              <td class="px-3 py-2">Bureaux</td>
+              <td class="px-3 py-2 text-right">784</td>
+              <td class="px-3 py-2 text-right font-medium">0,8</td>
+              <td class="px-3 py-2 text-right text-slate-500">21/06/2024</td>
+            </tr>
+            <tr class="bg-slate-50 font-semibold">
+              <td class="px-3 py-2">TOTAL</td>
+              <td class="px-3 py-2"></td>
+              <td class="px-3 py-2 text-right">13 344</td>
+              <td class="px-3 py-2 text-right">76,5</td>
+              <td class="px-3 py-2"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Concentration locative -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <h2 class="font-semibold text-slate-900 mb-4">Concentration Locative</h2>
+      <p class="text-sm text-slate-500 mb-4">Top 5 locataires = 16,1% des loyers — Diversification locative solide</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="border-b border-slate-200">
+            <tr>
+              <th class="text-left px-3 py-2 font-medium text-slate-600">Locataire</th>
+              <th class="text-right px-3 py-2 font-medium text-slate-600">% des loyers</th>
+              <th class="text-left px-3 py-2 font-medium text-slate-600">Baux</th>
+              <th class="px-3 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 font-medium">Chanel</td>
+              <td class="px-3 py-2 text-right">4,6%</td>
+              <td class="px-3 py-2">1 bail</td>
+              <td class="px-3 py-2"><div class="progress-bar w-32"><div class="fill bg-primary-500" style="width:29%"></div></div></td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 font-medium">Cushman &amp; Wakefield France</td>
+              <td class="px-3 py-2 text-right">3,4%</td>
+              <td class="px-3 py-2">1 bail</td>
+              <td class="px-3 py-2"><div class="progress-bar w-32"><div class="fill bg-primary-500" style="width:21%"></div></div></td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 font-medium">Padoa</td>
+              <td class="px-3 py-2 text-right">2,9%</td>
+              <td class="px-3 py-2">2 baux</td>
+              <td class="px-3 py-2"><div class="progress-bar w-32"><div class="fill bg-primary-500" style="width:18%"></div></div></td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 font-medium">Balenciaga</td>
+              <td class="px-3 py-2 text-right">2,9%</td>
+              <td class="px-3 py-2">1 bail</td>
+              <td class="px-3 py-2"><div class="progress-bar w-32"><div class="fill bg-primary-500" style="width:18%"></div></div></td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-3 py-2 font-medium">The Walt Disney Company France</td>
+              <td class="px-3 py-2 text-right">2,4%</td>
+              <td class="px-3 py-2">1 bail</td>
+              <td class="px-3 py-2"><div class="progress-bar w-32"><div class="fill bg-primary-500" style="width:15%"></div></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Expertises & évolution des valeurs -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <h2 class="font-semibold text-slate-900 mb-4">Évolution des Valeurs Vénales</h2>
+      <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+        <div class="flex items-start gap-3">
+          <span class="text-orange-500 text-xl">&#9888;&#65039;</span>
+          <div>
+            <p class="font-medium text-orange-800 text-sm">Baisse de -117 M&euro; en 2024 (1 887 M&euro; &rarr; 1 770 M&euro;)</p>
+            <p class="text-xs text-orange-600 mt-1">-82 M&euro; cessions &middot; +10 M&euro; travaux investissement &middot; -45 M&euro; variation &agrave; périm&egrave;tre constant (-2,45%)</p>
+            <p class="text-xs text-orange-600">Stabilisation au S2 2024 (-0,3%) apr&egrave;s -2,15% au S1</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- DONNÉES DE MARCHÉ -->
+  <!-- ================================================================== -->
+  <section id="marche" class="mt-12">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900">Données de Marché</h1>
+      <p class="text-slate-500 text-sm mt-1">Indicateurs de marché immobilier — Q4 2024 (sources : JLL, CBRE, BNP RE)</p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th class="text-left px-4 py-3 font-medium text-slate-600">Segment</th>
+              <th class="text-left px-4 py-3 font-medium text-slate-600">Géographie</th>
+              <th class="text-right px-4 py-3 font-medium text-slate-600">Taux capitalisation</th>
+              <th class="text-right px-4 py-3 font-medium text-slate-600">Loyer prime (&euro;/m&sup2;/an)</th>
+              <th class="text-right px-4 py-3 font-medium text-slate-600">Taux vacance</th>
+              <th class="text-left px-4 py-3 font-medium text-slate-600">Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-slate-50 bg-primary-50">
+              <td class="px-4 py-3 font-medium">Bureaux prime</td>
+              <td class="px-4 py-3">Paris QCA</td>
+              <td class="px-4 py-3 text-right font-medium">3,50%</td>
+              <td class="px-4 py-3 text-right">950 &euro;</td>
+              <td class="px-4 py-3 text-right text-green-600">3,2%</td>
+              <td class="px-4 py-3 text-slate-500">JLL</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-4 py-3 font-medium">Bureaux prime</td>
+              <td class="px-4 py-3">La Défense</td>
+              <td class="px-4 py-3 text-right font-medium">4,75%</td>
+              <td class="px-4 py-3 text-right">580 &euro;</td>
+              <td class="px-4 py-3 text-right text-red-600">12,5%</td>
+              <td class="px-4 py-3 text-slate-500">JLL</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-4 py-3 font-medium">Bureaux secondaire</td>
+              <td class="px-4 py-3">Ile-de-France</td>
+              <td class="px-4 py-3 text-right font-medium">5,50%</td>
+              <td class="px-4 py-3 text-right">320 &euro;</td>
+              <td class="px-4 py-3 text-right text-orange-600">8,7%</td>
+              <td class="px-4 py-3 text-slate-500">CBRE</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-4 py-3 font-medium">Commerces high street</td>
+              <td class="px-4 py-3">Paris</td>
+              <td class="px-4 py-3 text-right font-medium">3,25%</td>
+              <td class="px-4 py-3 text-right">15 000 &euro;</td>
+              <td class="px-4 py-3 text-right text-green-600">4,1%</td>
+              <td class="px-4 py-3 text-slate-500">CBRE</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-4 py-3 font-medium">Bureaux prime</td>
+              <td class="px-4 py-3">Lyon Part-Dieu</td>
+              <td class="px-4 py-3 text-right font-medium">4,25%</td>
+              <td class="px-4 py-3 text-right">330 &euro;</td>
+              <td class="px-4 py-3 text-right text-orange-600">5,8%</td>
+              <td class="px-4 py-3 text-slate-500">JLL</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-4 py-3 font-medium">Bureaux prime</td>
+              <td class="px-4 py-3">Marseille Euroméditerranée</td>
+              <td class="px-4 py-3 text-right font-medium">5,25%</td>
+              <td class="px-4 py-3 text-right">260 &euro;</td>
+              <td class="px-4 py-3 text-right text-orange-600">7,2%</td>
+              <td class="px-4 py-3 text-slate-500">JLL</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-4 py-3 font-medium">Logistique</td>
+              <td class="px-4 py-3">Ile-de-France</td>
+              <td class="px-4 py-3 text-right font-medium">4,80%</td>
+              <td class="px-4 py-3 text-right">72 &euro;</td>
+              <td class="px-4 py-3 text-right text-green-600">2,8%</td>
+              <td class="px-4 py-3 text-slate-500">JLL</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-4 py-3 font-medium">Santé</td>
+              <td class="px-4 py-3">France</td>
+              <td class="px-4 py-3 text-right font-medium">5,00%</td>
+              <td class="px-4 py-3 text-right">180 &euro;</td>
+              <td class="px-4 py-3 text-right text-green-600">3,5%</td>
+              <td class="px-4 py-3 text-slate-500">BNP RE</td>
+            </tr>
+            <tr class="border-b border-slate-50">
+              <td class="px-4 py-3 font-medium">Résidentiel</td>
+              <td class="px-4 py-3">Paris</td>
+              <td class="px-4 py-3 text-right font-medium">3,00%</td>
+              <td class="px-4 py-3 text-right">420 &euro;</td>
+              <td class="px-4 py-3 text-right text-green-600">2,1%</td>
+              <td class="px-4 py-3 text-slate-500">CBRE</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Contexte marché -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+      <h2 class="font-semibold text-slate-900 mb-3">Contexte Marché 2024</h2>
+      <div class="prose prose-sm text-slate-600 max-w-none space-y-2">
+        <p>L'année 2024 a été marquée par une forte volatilité sur les taux d'intérêts compte tenu du contexte géopolitique et de l'instabilité politique. La BCE a entamé une baisse des taux directeurs de <strong>4,00%</strong> &agrave; <strong>3,15%</strong> entre juin et décembre 2024.</p>
+        <p>Les entreprises plébiscitent les immeubles en localisations centrales, bien desservis par les transports, pour attirer les talents. La hausse des loyers observée sur ces localisations laisse entrevoir un potentiel de revenus supplémentaires pour les SCPI positionnées sur Paris QCA.</p>
+        <p>Les valeurs vénales se sont stabilisées au S2 2024 (-0,3%) après une baisse plus marquée au S1 (-2,15%), signe d'un début de normalisation du marché.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- ESG / ISR -->
+  <!-- ================================================================== -->
+  <section id="esg" class="mt-12">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900">ESG / Investissement Responsable</h1>
+      <p class="text-slate-500 text-sm mt-1">Label ISR obtenu en juin 2022 &middot; Article 8 SFDR &middot; Taxonomie 1%</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div class="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 class="font-semibold text-slate-900 mb-3">Indicateurs de Performance ESG</h3>
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600">Consommation énergétique</span>
+            <span class="font-semibold text-slate-900">156,35 kWhEF/m&sup2;.an</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600">Émissions GES</span>
+            <span class="font-semibold text-slate-900">16,56 kgCO2eq/m&sup2;</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600">Clauses ESG Property Managers</span>
+            <span class="font-semibold text-green-600">100%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600">Accessibilité transports (&lt;500m)</span>
+            <span class="font-semibold text-green-600">100%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600">Accessibilité PMR</span>
+            <span class="font-semibold text-slate-900">77%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600">Audit résilience réalisé</span>
+            <span class="font-semibold text-green-600">98%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600">Engagement locataires ESG</span>
+            <span class="font-semibold text-green-600">98%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600">Actifs sans risque amiante</span>
+            <span class="font-semibold text-green-600">98%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 class="font-semibold text-slate-900 mb-3">Stratégie ISR Best-in-Progress</h3>
+        <div class="space-y-3">
+          <div class="bg-green-50 rounded-lg p-3">
+            <p class="text-xs text-green-600 font-medium">Objectif</p>
+            <p class="text-sm text-green-800">+20 points de progression en 3 ans ou score moyen de 60/100</p>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3">
+            <p class="text-xs text-slate-500">Note moyenne portefeuille (Phase 1)</p>
+            <p class="text-lg font-bold text-slate-900">35/100</p>
+            <p class="text-xs text-slate-400">60 actifs évalués &middot; Grille 44 critères</p>
+          </div>
+          <div class="text-sm text-slate-600 space-y-1">
+            <p><strong>Pondérations E/S/G :</strong></p>
+            <div class="flex gap-3">
+              <span class="badge bg-green-100 text-green-700">Environnement 50%</span>
+              <span class="badge bg-blue-100 text-blue-700">Social 30%</span>
+              <span class="badge bg-purple-100 text-purple-700">Gouvernance 20%</span>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 mt-2">
+            Critères d'exclusion : Note &lt;15/100 ou pollution non déposable
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <!-- PÉDAGOGIE -->
+  <!-- ================================================================== -->
+  <section class="mt-12 mb-12">
+    <div class="bg-primary-50 border border-primary-200 rounded-xl p-6">
+      <h2 class="font-semibold text-primary-900 mb-2">Comprendre les métriques SCPI</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-primary-800">
+        <div>
+          <p class="font-medium">TD — Taux de Distribution</p>
+          <p class="text-primary-600 mt-1">
+            Dividende brut / prix de part au 1er janvier. Remplace le TDVM depuis 2022.
+            Un TD de 3,53% signifie que pour 1 000&euro; investis, vous recevez ~35&euro; de revenus annuels.
+          </p>
+        </div>
+        <div>
+          <p class="font-medium">TOF — Taux d'Occupation Financier</p>
+          <p class="text-primary-600 mt-1">
+            Loyers facturés / loyers théoriques si 100% occupé. Un TOF &gt; 90% est bon.
+            &Agrave; 89,4%, Accès Valeur Pierre est en zone de vigilance (restructurations en cours).
+          </p>
+        </div>
+        <div>
+          <p class="font-medium">RAN — Report &agrave; Nouveau</p>
+          <p class="text-primary-600 mt-1">
+            Réserve de bénéfices non distribués. 10,93&euro;/part chez AVP, en baisse continue.
+            C'est un matelas de sécurité qui se réduit.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 py-6 text-center text-sm text-slate-400">
+    <p>CGP Immo Analytics — Données extraites du Rapport Annuel 2024 d'Accès Valeur Pierre (BNP Paribas REIM France)</p>
+    <p class="mt-1">Source : ACCES_VALEUR_PIERRE_RA_2024.pdf &middot; Export généré le 06/02/2026</p>
+  </footer>
+
+</main>
+</body>
+</html>
