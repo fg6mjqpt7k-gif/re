@@ -1,0 +1,38 @@
+# FastAPI
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# Base de données
+sqlalchemy==2.0.36
+asyncpg==0.30.0
+psycopg2-binary==2.9.10
+alembic==1.14.0
+geoalchemy2==0.15.2
+
+# Auth
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+pydantic[email]==2.10.3
+pydantic-settings==2.7.0
+
+# Data processing
+pandas==2.2.3
+numpy==1.26.4
+httpx==0.28.1
+
+# PDF parsing
+pymupdf==1.25.1
+tabula-py==2.10.0
+pdfplumber==0.11.4
+
+# Claude API (pour analyse P&L)
+anthropic==0.42.0
+
+# Géocodage
+geopy==2.4.1
+
+# Utils
+python-dotenv==1.0.1
+tenacity==9.0.0
+loguru==0.7.3
