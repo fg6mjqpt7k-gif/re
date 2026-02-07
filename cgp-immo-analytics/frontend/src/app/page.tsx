@@ -116,9 +116,10 @@ const FEATURES = [
     icon: '✓',
   },
   {
-    title: 'Simulateur patrimonial',
-    description: 'Simulez l\'impact fiscal, le rendement net et la plus-value potentielle pour vos clients.',
+    title: 'Simulateur TRI SCPI',
+    description: 'Simulez le Taux de Rendement Interne sur 5 et 10 ans. Ajustez rendement et prix de part pour explorer différents scénarios.',
     icon: '⊞',
+    link: '/simulateur',
   },
   {
     title: 'Conformité DDA / MIF2',
@@ -187,6 +188,7 @@ function Navbar() {
           <a href="#fonds" className="hover:text-t-primary transition">Fonds analysés</a>
           <a href="#methodologie" className="hover:text-t-primary transition">Méthodologie</a>
           <a href="#tarifs" className="hover:text-t-primary transition">Tarifs</a>
+          <a href="/simulateur" className="hover:text-t-primary transition">Simulateur TRI</a>
           <a href="#ressources" className="hover:text-t-primary transition">Ressources</a>
         </div>
 
