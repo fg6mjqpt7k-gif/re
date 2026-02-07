@@ -1,5 +1,6 @@
 """
-API Actifs — Carte, géolocalisation, filtres.
+API Actifs — Carte, geolocalisation, filtres.
+C1 FIX: All endpoints require authentication.
 """
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,8 +9,9 @@ from typing import Optional
 from uuid import UUID
 
 from app.core.config import get_db
-from app.models.models import Asset, Fund
+from app.models.models import Asset, Fund, User
 from app.schemas.schemas import AssetOut, AssetMapOut
+from app.api.auth import get_current_user
 
 router = APIRouter()
 
@@ -22,6 +24,7 @@ async def get_assets_for_map(
     city: Optional[str] = Query(None),
     country: Optional[str] = Query(None, description="Filtre par pays"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """Tous les actifs géolocalisés pour la carte interactive."""
     
@@ -77,7 +80,7 @@ async def get_assets_for_map(
 
 
 @router.get("/fund/{fund_id}", response_model=list[AssetOut])
-async def get_fund_assets(fund_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_fund_assets(fund_id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Liste des actifs d'un fonds spécifique."""
     result = await db.execute(
         select(Asset)
@@ -88,7 +91,7 @@ async def get_fund_assets(fund_id: UUID, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/stats")
-async def get_assets_stats(db: AsyncSession = Depends(get_db)):
+async def get_assets_stats(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Statistiques sur le patrimoine."""
     
     # Par type d'actif

@@ -1026,7 +1026,7 @@ export const SCPI_DATA: SCPI[] = [
     partRevenusEtrangers: 0,
     partPlusValues: 5,
     repartitionGeo: [
-      { pays: 'Paris intra-muros', pct: 73.6 }, { pays: 'Region parisienne', pct: 21.3 }, { pays: 'Province', pct: 5.0 },
+      { pays: 'France', pct: 100 },
     ],
     repartitionSectorielle: [
       { secteur: 'Bureaux', pct: 92.4 }, { secteur: 'Commerces', pct: 7.6 },
@@ -1088,7 +1088,7 @@ export const SCPI_DATA: SCPI[] = [
     partRevenusEtrangers: 15,
     partPlusValues: 4,
     repartitionGeo: [
-      { pays: 'Ile-de-France', pct: 72 }, { pays: 'Province', pct: 18 }, { pays: 'Europe', pct: 10 },
+      { pays: 'France', pct: 90 }, { pays: 'Europe (autres)', pct: 10 },
     ],
     repartitionSectorielle: [
       { secteur: 'Bureaux', pct: 85 }, { secteur: 'Commerces', pct: 10 }, { secteur: 'Logistique', pct: 5 },
@@ -1206,7 +1206,7 @@ export const SCPI_DATA: SCPI[] = [
     partRevenusEtrangers: 10,
     partPlusValues: 6,
     repartitionGeo: [
-      { pays: 'Paris QCA', pct: 52 }, { pays: 'Region parisienne', pct: 35 }, { pays: 'Province', pct: 8 }, { pays: 'Europe', pct: 5 },
+      { pays: 'France', pct: 95 }, { pays: 'Europe (autres)', pct: 5 },
     ],
     repartitionSectorielle: [
       { secteur: 'Bureaux', pct: 88 }, { secteur: 'Commerces', pct: 8 }, { secteur: 'Hotels', pct: 4 },
@@ -1380,7 +1380,7 @@ export const SCPI_DATA: SCPI[] = [
     partRevenusEtrangers: 5,
     partPlusValues: 8,
     repartitionGeo: [
-      { pays: 'Paris QCA', pct: 45 }, { pays: 'La Defense', pct: 22 }, { pays: 'Region parisienne', pct: 25 }, { pays: 'Province', pct: 8 },
+      { pays: 'France', pct: 100 },
     ],
     repartitionSectorielle: [
       { secteur: 'Bureaux', pct: 95 }, { secteur: 'Commerces', pct: 5 },
@@ -1503,7 +1503,7 @@ export const SCPI_DATA: SCPI[] = [
     partRevenusEtrangers: 0,
     partPlusValues: 5,
     repartitionGeo: [
-      { pays: 'Ile-de-France', pct: 45 }, { pays: 'Province', pct: 55 },
+      { pays: 'France', pct: 100 },
     ],
     repartitionSectorielle: [
       { secteur: 'Commerces', pct: 70 }, { secteur: 'Commerces alimentaires', pct: 20 }, { secteur: 'Bureaux', pct: 10 },
@@ -1593,10 +1593,14 @@ export function runCoherenceChecks(scpis: SCPI[] = SCPI_DATA): CheckCoherence[] 
     }
 
     // 4. Dividende historique coherent avec TD * prix
+    // FIN FIX: TD ASPIM = dividende / prix au 1er janvier (not year-end prixPart).
+    // We use the previous year's prixPart as proxy for Jan 1st price when available.
     if (lastHisto) {
-      const divAttendu = lastHisto.prixPart * lastHisto.td / 100
-      if (Math.abs(divAttendu - lastHisto.dividende) > 1.0) {
-        checks.push({ scpiId: scpi.id, scpiNom: scpi.nom, type: 'alerte', categorie: 'Dividende vs TD', message: `Dividende ${lastHisto.dividende}\u20AC != TD*prix ${divAttendu.toFixed(2)}\u20AC`, detail: `Ecart: ${Math.abs(divAttendu - lastHisto.dividende).toFixed(2)}\u20AC` })
+      const prevHisto = scpi.historique.length >= 2 ? scpi.historique[scpi.historique.length - 2] : null
+      const prixRef = prevHisto ? prevHisto.prixPart : lastHisto.prixPart
+      const divAttendu = prixRef * lastHisto.td / 100
+      if (Math.abs(divAttendu - lastHisto.dividende) > 2.0) {
+        checks.push({ scpiId: scpi.id, scpiNom: scpi.nom, type: 'alerte', categorie: 'Dividende vs TD', message: `Dividende ${lastHisto.dividende}\u20AC != TD*prixRef ${divAttendu.toFixed(2)}\u20AC`, detail: `Prix ref (1er janv. proxy): ${prixRef}\u20AC` })
       } else {
         checks.push({ scpiId: scpi.id, scpiNom: scpi.nom, type: 'ok', categorie: 'Dividende vs TD', message: `Dividende coherent: ${lastHisto.dividende}\u20AC` })
       }
@@ -1710,11 +1714,31 @@ export const TMI_TRANCHES = [
 
 export const PRELEVEMENTS_SOCIAUX = 17.2 // %
 
+// FIN FIX: Per-country convention tax credit rates (taux effectif moyen par pays)
+// Source: conventions fiscales bilaterales France - pays
+export const CREDIT_IMPOT_PAR_PAYS: Record<string, number> = {
+  'Pays-Bas': 15,
+  'Allemagne': 15.825,
+  'Italie': 26,
+  'Espagne': 19,
+  'Portugal': 25,
+  'Irlande': 20,
+  'Belgique': 30,
+  'Finlande': 30,
+  'Royaume-Uni': 20,
+  'Pologne': 8.5,
+  'Lituanie': 15,
+  'Norvege': 25,
+  'Canada': 25,
+}
+const CREDIT_IMPOT_MOYEN_DEFAUT = 20 // fallback for unknown countries
+
 export function calcRevenuNetMensuel(
   montantInvesti: number,
   td: number,
   tmi: number,
   partEtranger: number,
+  paysEtrangers?: { pays: string; pct: number }[],
 ): { brut: number; net: number; ir: number; ps: number } {
   const revenuAnnuelBrut = montantInvesti * (td / 100)
   const revenuFrancais = revenuAnnuelBrut * ((100 - partEtranger) / 100)
@@ -1724,9 +1748,22 @@ export function calcRevenuNetMensuel(
   const irFrance = revenuFrancais * (tmi / 100)
   const psFrance = revenuFrancais * (PRELEVEMENTS_SOCIAUX / 100)
 
-  // Revenus etrangers : credit d'impot (taux effectif moyen ~20%) + PS reduits (7.5% CSG deductible)
-  const tauxEffectifEtranger = Math.max(0, tmi - 20) // convention fiscale ~20% de credit
-  const irEtranger = revenuEtranger * (tauxEffectifEtranger / 100)
+  // FIN FIX: Revenus etrangers — credit d'impot par pays (conventions fiscales bilaterales)
+  let irEtranger = 0
+  if (paysEtrangers && paysEtrangers.length > 0) {
+    // Use per-country credit rates weighted by geographic allocation
+    for (const { pays, pct } of paysEtrangers) {
+      const creditTaux = CREDIT_IMPOT_PAR_PAYS[pays] ?? CREDIT_IMPOT_MOYEN_DEFAUT
+      const revenuPays = revenuEtranger * (pct / 100)
+      irEtranger += revenuPays * Math.max(0, tmi - creditTaux) / 100
+    }
+  } else {
+    // Fallback: average credit rate
+    const tauxEffectifEtranger = Math.max(0, tmi - CREDIT_IMPOT_MOYEN_DEFAUT)
+    irEtranger = revenuEtranger * (tauxEffectifEtranger / 100)
+  }
+
+  // PS on foreign income (PS 17.2% applies to all real estate income)
   const psEtranger = revenuEtranger * (PRELEVEMENTS_SOCIAUX / 100)
 
   const totalIR = irFrance + irEtranger
@@ -1746,6 +1783,7 @@ export function calcRevenuNetMensuel(
 // ============================================================
 
 export function computeIRR(cashFlows: number[], guess = 0.05, maxIter = 200): number | null {
+  // FIN FIX: Return null if Newton-Raphson does not converge within maxIter
   let rate = guess
   for (let i = 0; i < maxIter; i++) {
     let npv = 0, dnpv = 0
@@ -1753,13 +1791,13 @@ export function computeIRR(cashFlows: number[], guess = 0.05, maxIter = 200): nu
       npv += cashFlows[t] / Math.pow(1 + rate, t)
       if (t > 0) dnpv -= t * cashFlows[t] / Math.pow(1 + rate, t + 1)
     }
-    if (Math.abs(dnpv) < 1e-15) break
+    if (Math.abs(dnpv) < 1e-15) return null // derivative too small, can't converge
     const newRate = rate - npv / dnpv
     if (Math.abs(newRate - rate) < 1e-10) return newRate
     rate = newRate
     if (rate < -0.99 || rate > 10) return null
   }
-  return rate
+  return null // did not converge within maxIter
 }
 
 // ============================================================

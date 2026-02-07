@@ -1,5 +1,6 @@
 """
-API Fonds — Liste, détail, filtres, historique.
+API Fonds — Liste, detail, filtres, historique.
+C1 FIX: All endpoints require authentication.
 """
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,8 +10,9 @@ from typing import Optional
 from uuid import UUID
 
 from app.core.config import get_db
-from app.models.models import Fund, ManagementCompany, FundHistory, FundFinancial, RiskScore
+from app.models.models import Fund, ManagementCompany, FundHistory, FundFinancial, RiskScore, User
 from app.schemas.schemas import FundOut, FundListOut, FundHistoryOut, FundFinancialOut, RiskScoreOut
+from app.api.auth import get_current_user
 
 router = APIRouter()
 
@@ -28,6 +30,7 @@ async def list_funds(
     sort_by: str = Query("name", description="name, distribution_rate, market_capitalization, occupancy_rate"),
     sort_order: str = Query("asc", description="asc, desc"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """Liste paginée des fonds avec filtres."""
     
@@ -81,7 +84,7 @@ async def list_funds(
 
 
 @router.get("/{fund_id}", response_model=FundOut)
-async def get_fund(fund_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_fund(fund_id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Détail d'un fonds."""
     result = await db.execute(
         select(Fund)
@@ -95,7 +98,7 @@ async def get_fund(fund_id: UUID, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{fund_id}/history", response_model=list[FundHistoryOut])
-async def get_fund_history(fund_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_fund_history(fund_id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Historique d'un fonds."""
     result = await db.execute(
         select(FundHistory)
@@ -106,7 +109,7 @@ async def get_fund_history(fund_id: UUID, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{fund_id}/financials", response_model=list[FundFinancialOut])
-async def get_fund_financials(fund_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_fund_financials(fund_id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Comptes de résultat d'un fonds."""
     result = await db.execute(
         select(FundFinancial)
@@ -117,7 +120,7 @@ async def get_fund_financials(fund_id: UUID, db: AsyncSession = Depends(get_db))
 
 
 @router.get("/{fund_id}/risk", response_model=Optional[RiskScoreOut])
-async def get_fund_risk(fund_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_fund_risk(fund_id: UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Dernier scoring de risque d'un fonds."""
     result = await db.execute(
         select(RiskScore)
@@ -132,7 +135,7 @@ async def get_fund_risk(fund_id: UUID, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/stats/overview")
-async def get_funds_overview(db: AsyncSession = Depends(get_db)):
+async def get_funds_overview(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Statistiques globales du marché."""
     
     # Count par type

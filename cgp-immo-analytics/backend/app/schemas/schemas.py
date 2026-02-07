@@ -206,13 +206,22 @@ class RiskScoreOut(BaseModel):
 # User / Auth
 # =============================================================================
 class UserCreate(BaseModel):
+    """C2 FIX: role field removed — always defaults to 'student' server-side."""
     email: EmailStr
     password: str
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    role: str = "student"
     school: Optional[str] = None
-    referral_code: Optional[str] = None  # Code de parrainage utilisé
+    referral_code: Optional[str] = None
+
+class LoginRequest(BaseModel):
+    """C3 FIX: Credentials in request body, not query params."""
+    email: EmailStr
+    password: str
+
+class RefreshRequest(BaseModel):
+    """H2 FIX: Refresh token request."""
+    refresh_token: str
 
 class UserOut(BaseModel):
     id: UUID
@@ -225,10 +234,11 @@ class UserOut(BaseModel):
     referral_code: Optional[str] = None
     referral_count: int = 0
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: Optional[str] = None
     token_type: str = "bearer"

@@ -88,8 +88,17 @@ class ApiClient {
   }
 
   login(email: string, password: string) {
-    return this.request(`/api/auth/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
+    // C3 FIX: Credentials in request body, not URL query params
+    return this.request('/api/auth/login', {
       method: 'POST',
+      body: JSON.stringify({ email, password }),
+    })
+  }
+
+  refreshToken(refreshToken: string) {
+    return this.request('/api/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refresh_token: refreshToken }),
     })
   }
 }
