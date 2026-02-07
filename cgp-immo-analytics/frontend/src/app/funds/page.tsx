@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, Fragment } from 'react'
-import { SCPI_DATA, SCPI } from '../../lib/data'
+import { SCPI_DATA, SCPI, SCPIBilan, SCPICompteResultat, runCoherenceChecks, CheckCoherence } from '../../lib/data'
 import AppShell from '../../components/AppShell'
 
 // ============================================================
@@ -270,6 +270,194 @@ function ExpandedDetails({ scpi }: { scpi: SCPI }) {
           </div>
         ))}
       </div>
+
+      {/* Bilan & Compte de Resultat */}
+      {scpi.bilans.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          {/* BILAN */}
+          <div className="glass-card p-4" style={{ transform: 'none' }}>
+            <h4 className="text-sm font-semibold text-[#F1F5F9] mb-3 flex items-center gap-2">
+              <svg className="w-4 h-4 text-[#8B5CF6]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+              </svg>
+              Bilan (M\u20AC)
+            </h4>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-white/[0.06]">
+                    <th className="text-left py-2 pr-3 text-[#475569] font-medium">Poste</th>
+                    {scpi.bilans.map(b => (
+                      <th key={b.annee} className="text-right py-2 px-2 text-[#475569] font-medium">{b.annee}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-white/[0.03]">
+                    <td className="py-1.5 pr-3 text-[#60a5fa] font-semibold" colSpan={scpi.bilans.length + 1}>ACTIF</td>
+                  </tr>
+                  {[
+                    { label: 'Immobilisations nettes', key: 'immobilisationsNettes' as keyof SCPIBilan },
+                    { label: 'Autres actifs immobilises', key: 'autresActifsImmobilises' as keyof SCPIBilan },
+                    { label: 'Creances clients', key: 'creancesClients' as keyof SCPIBilan },
+                    { label: 'Tresorerie', key: 'tresorerie' as keyof SCPIBilan },
+                    { label: 'Autres actifs circulants', key: 'autresActifsCirculants' as keyof SCPIBilan },
+                  ].map(row => (
+                    <tr key={row.key} className="border-b border-white/[0.03]">
+                      <td className="py-1 pr-3 text-[#94A3B8]">{row.label}</td>
+                      {scpi.bilans.map(b => (
+                        <td key={b.annee} className="py-1 px-2 text-right font-mono text-[#F1F5F9]">{(b[row.key] as number).toFixed(1)}</td>
+                      ))}
+                    </tr>
+                  ))}
+                  <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+                    <td className="py-1.5 pr-3 text-[#F1F5F9] font-semibold">Total Actif</td>
+                    {scpi.bilans.map(b => (
+                      <td key={b.annee} className="py-1.5 px-2 text-right font-mono font-semibold text-[#60a5fa]">{b.totalActif.toFixed(1)}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-white/[0.03]">
+                    <td className="py-1.5 pr-3 text-[#10B981] font-semibold pt-3" colSpan={scpi.bilans.length + 1}>PASSIF</td>
+                  </tr>
+                  {[
+                    { label: 'Capital social', key: 'capitalSocial' as keyof SCPIBilan },
+                    { label: 'Primes d\'emission', key: 'primesEmission' as keyof SCPIBilan },
+                    { label: 'Report a nouveau', key: 'reportANouveau' as keyof SCPIBilan },
+                    { label: 'Resultat exercice', key: 'resultatExercice' as keyof SCPIBilan },
+                  ].map(row => (
+                    <tr key={row.key} className="border-b border-white/[0.03]">
+                      <td className="py-1 pr-3 text-[#94A3B8]">{row.label}</td>
+                      {scpi.bilans.map(b => (
+                        <td key={b.annee} className="py-1 px-2 text-right font-mono text-[#F1F5F9]">{(b[row.key] as number).toFixed(1)}</td>
+                      ))}
+                    </tr>
+                  ))}
+                  <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+                    <td className="py-1.5 pr-3 text-[#F1F5F9] font-semibold">Capitaux propres</td>
+                    {scpi.bilans.map(b => (
+                      <td key={b.annee} className="py-1.5 px-2 text-right font-mono font-semibold text-[#10B981]">{b.totalCapitauxPropres.toFixed(1)}</td>
+                    ))}
+                  </tr>
+                  {[
+                    { label: 'Provisions', key: 'provisions' as keyof SCPIBilan },
+                    { label: 'Dettes financieres', key: 'dettesFinancieres' as keyof SCPIBilan },
+                    { label: 'Dettes exploitation', key: 'dettesExploitation' as keyof SCPIBilan },
+                    { label: 'Autres dettes', key: 'autresDettes' as keyof SCPIBilan },
+                  ].map(row => (
+                    <tr key={row.key} className="border-b border-white/[0.03]">
+                      <td className="py-1 pr-3 text-[#94A3B8]">{row.label}</td>
+                      {scpi.bilans.map(b => (
+                        <td key={b.annee} className="py-1 px-2 text-right font-mono text-[#EF4444]/80">{(b[row.key] as number).toFixed(1)}</td>
+                      ))}
+                    </tr>
+                  ))}
+                  <tr className="bg-white/[0.02]">
+                    <td className="py-1.5 pr-3 text-[#F1F5F9] font-semibold">Total Passif</td>
+                    {scpi.bilans.map(b => (
+                      <td key={b.annee} className="py-1.5 px-2 text-right font-mono font-semibold text-[#60a5fa]">{b.totalPassif.toFixed(1)}</td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* COMPTE DE RESULTAT */}
+          <div className="glass-card p-4" style={{ transform: 'none' }}>
+            <h4 className="text-sm font-semibold text-[#F1F5F9] mb-3 flex items-center gap-2">
+              <svg className="w-4 h-4 text-[#10B981]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+              </svg>
+              Compte de Resultat (M\u20AC)
+            </h4>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-white/[0.06]">
+                    <th className="text-left py-2 pr-3 text-[#475569] font-medium">Poste</th>
+                    {scpi.comptesResultat.map(c => (
+                      <th key={c.annee} className="text-right py-2 px-2 text-[#475569] font-medium">{c.annee}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-white/[0.03]">
+                    <td className="py-1.5 pr-3 text-[#10B981] font-semibold" colSpan={scpi.comptesResultat.length + 1}>PRODUITS</td>
+                  </tr>
+                  <tr className="border-b border-white/[0.03]">
+                    <td className="py-1 pr-3 text-[#94A3B8]">Produits locatifs</td>
+                    {scpi.comptesResultat.map(c => (
+                      <td key={c.annee} className="py-1 px-2 text-right font-mono text-[#10B981]">{c.produitsLocatifs.toFixed(1)}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-white/[0.03]">
+                    <td className="py-1 pr-3 text-[#94A3B8]">Autres produits</td>
+                    {scpi.comptesResultat.map(c => (
+                      <td key={c.annee} className="py-1 px-2 text-right font-mono text-[#F1F5F9]">{c.autresProduits.toFixed(1)}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+                    <td className="py-1.5 pr-3 text-[#F1F5F9] font-semibold">Total Produits</td>
+                    {scpi.comptesResultat.map(c => (
+                      <td key={c.annee} className="py-1.5 px-2 text-right font-mono font-semibold text-[#10B981]">{c.totalProduits.toFixed(1)}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-white/[0.03]">
+                    <td className="py-1.5 pr-3 text-[#EF4444] font-semibold pt-2" colSpan={scpi.comptesResultat.length + 1}>CHARGES</td>
+                  </tr>
+                  {[
+                    { label: 'Charges immobilieres', key: 'chargesImmobilieres' as keyof SCPICompteResultat },
+                    { label: 'Charges de gestion', key: 'chargesGestion' as keyof SCPICompteResultat },
+                    { label: 'Charges financieres', key: 'chargesFinancieres' as keyof SCPICompteResultat },
+                    { label: 'Dotations provisions', key: 'dotationsProvisions' as keyof SCPICompteResultat },
+                    { label: 'Autres charges', key: 'autresCharges' as keyof SCPICompteResultat },
+                  ].map(row => (
+                    <tr key={row.key} className="border-b border-white/[0.03]">
+                      <td className="py-1 pr-3 text-[#94A3B8]">{row.label}</td>
+                      {scpi.comptesResultat.map(c => (
+                        <td key={c.annee} className="py-1 px-2 text-right font-mono text-[#EF4444]/80">-{(c[row.key] as number).toFixed(1)}</td>
+                      ))}
+                    </tr>
+                  ))}
+                  <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+                    <td className="py-1.5 pr-3 text-[#F1F5F9] font-semibold">Total Charges</td>
+                    {scpi.comptesResultat.map(c => (
+                      <td key={c.annee} className="py-1.5 px-2 text-right font-mono font-semibold text-[#EF4444]">-{c.totalCharges.toFixed(1)}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-white/[0.03]">
+                    <td className="py-1.5 pr-3 text-[#8B5CF6] font-semibold pt-2" colSpan={scpi.comptesResultat.length + 1}>RESULTATS</td>
+                  </tr>
+                  <tr className="border-b border-white/[0.03]">
+                    <td className="py-1 pr-3 text-[#94A3B8]">Resultat courant</td>
+                    {scpi.comptesResultat.map(c => (
+                      <td key={c.annee} className="py-1 px-2 text-right font-mono text-[#F1F5F9]">{c.resultatCourant.toFixed(1)}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-white/[0.03]">
+                    <td className="py-1 pr-3 text-[#94A3B8]">Resultat exceptionnel</td>
+                    {scpi.comptesResultat.map(c => (
+                      <td key={c.annee} className="py-1 px-2 text-right font-mono text-[#94A3B8]">{c.resultatExceptionnel.toFixed(1)}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-white/[0.03] bg-white/[0.02]">
+                    <td className="py-1.5 pr-3 text-[#F1F5F9] font-bold">Resultat net</td>
+                    {scpi.comptesResultat.map(c => (
+                      <td key={c.annee} className="py-1.5 px-2 text-right font-mono font-bold text-[#60a5fa]">{c.resultatNet.toFixed(1)}</td>
+                    ))}
+                  </tr>
+                  <tr className="bg-white/[0.04]">
+                    <td className="py-1.5 pr-3 text-[#F1F5F9] font-semibold">Resultat net / part</td>
+                    {scpi.comptesResultat.map(c => (
+                      <td key={c.annee} className="py-1.5 px-2 text-right font-mono font-semibold text-[#EAB308]">{c.resultatNetParPart.toFixed(2)} \u20AC</td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -285,6 +473,18 @@ export default function FundsPage() {
   const [sortField, setSortField] = useState<SortField>('scoreAlpha')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [showCoherence, setShowCoherence] = useState(false)
+
+  // Coherence checks
+  const coherenceResults = useMemo(() => showCoherence ? runCoherenceChecks() : [], [showCoherence])
+  const coherenceStats = useMemo(() => {
+    if (!showCoherence) return { erreurs: 0, alertes: 0, ok: 0 }
+    return {
+      erreurs: coherenceResults.filter(c => c.type === 'erreur').length,
+      alertes: coherenceResults.filter(c => c.type === 'alerte').length,
+      ok: coherenceResults.filter(c => c.type === 'ok').length,
+    }
+  }, [coherenceResults, showCoherence])
 
   // Extract unique categories
   const categories = useMemo(() => {
@@ -432,6 +632,90 @@ export default function FundsPage() {
             <div className="text-xl font-bold font-mono text-[#F1F5F9]">{stats.avgTof.toFixed(1)}%</div>
           </div>
         </div>
+      </div>
+
+      {/* ============================================================ */}
+      {/* CHECK DE COHERENCE                                            */}
+      {/* ============================================================ */}
+      <div className="mb-6">
+        <button
+          onClick={() => setShowCoherence(!showCoherence)}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition ${
+            showCoherence
+              ? 'bg-[#8B5CF6]/20 text-[#a78bfa] border border-[#8B5CF6]/30'
+              : 'bg-white/[0.05] text-[#94A3B8] border border-white/[0.06] hover:border-white/[0.12] hover:text-[#F1F5F9]'
+          }`}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+          </svg>
+          Check de coherence
+          {showCoherence && (
+            <span className="ml-2 flex items-center gap-2 text-xs">
+              {coherenceStats.erreurs > 0 && <span className="px-1.5 py-0.5 rounded bg-[#EF4444]/20 text-[#EF4444]">{coherenceStats.erreurs} err.</span>}
+              {coherenceStats.alertes > 0 && <span className="px-1.5 py-0.5 rounded bg-[#EAB308]/20 text-[#EAB308]">{coherenceStats.alertes} alertes</span>}
+              <span className="px-1.5 py-0.5 rounded bg-[#10B981]/20 text-[#10B981]">{coherenceStats.ok} ok</span>
+            </span>
+          )}
+        </button>
+
+        {showCoherence && (
+          <div className="glass-card mt-3 p-4 animate-fade-in" style={{ transform: 'none' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-[#F1F5F9]">Resultats du check de coherence</h3>
+              <div className="flex items-center gap-3 text-xs">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#EF4444]" />
+                  <span className="text-[#94A3B8]">{coherenceStats.erreurs} erreur{coherenceStats.erreurs > 1 ? 's' : ''}</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#EAB308]" />
+                  <span className="text-[#94A3B8]">{coherenceStats.alertes} alerte{coherenceStats.alertes > 1 ? 's' : ''}</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#10B981]" />
+                  <span className="text-[#94A3B8]">{coherenceStats.ok} ok</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Erreurs et alertes */}
+            {coherenceResults.filter(c => c.type !== 'ok').length > 0 ? (
+              <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
+                {coherenceResults.filter(c => c.type !== 'ok').map((check, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-start gap-3 px-3 py-2 rounded-lg text-xs ${
+                      check.type === 'erreur' ? 'bg-[#EF4444]/10 border border-[#EF4444]/20' : 'bg-[#EAB308]/10 border border-[#EAB308]/20'
+                    }`}
+                  >
+                    <span className={`mt-0.5 w-4 h-4 shrink-0 ${check.type === 'erreur' ? 'text-[#EF4444]' : 'text-[#EAB308]'}`}>
+                      {check.type === 'erreur' ? (
+                        <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                      ) : (
+                        <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                      )}
+                    </span>
+                    <div>
+                      <span className="font-semibold text-[#F1F5F9]">{check.scpiNom}</span>
+                      <span className="text-[#475569] mx-1.5">/</span>
+                      <span className="text-[#94A3B8]">{check.categorie}</span>
+                      <p className={`mt-0.5 ${check.type === 'erreur' ? 'text-[#FCA5A5]' : 'text-[#FDE68A]'}`}>{check.message}</p>
+                      {check.detail && <p className="text-[#475569] mt-0.5">{check.detail}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-4 rounded-lg bg-[#10B981]/10 border border-[#10B981]/20">
+                <svg className="w-5 h-5 text-[#10B981]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm text-[#10B981] font-medium">Toutes les donnees sont coherentes</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ============================================================ */}
