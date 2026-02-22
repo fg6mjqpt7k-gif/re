@@ -1,0 +1,95 @@
+version: "3.9"
+
+services:
+  # ===========================================
+  # PostgreSQL + PostGIS
+  # M3 FIX: Port no longer exposed to host (internal network only)
+  # ===========================================
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: cgp-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cgp_immo
+      POSTGRES_USER: cgp_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+    # M3 FIX: Port 5432 no longer exposed to host — only accessible via Docker network
+    expose:
+      - "5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./data/seed/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cgp_admin -d cgp_immo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # FastAPI Backend
+  # C4 FIX: Secrets from .env, not hardcoded
+  # H4 FIX: Non-root user in Dockerfile
+  # ===========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cgp-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://cgp_admin:${DB_PASSWORD:?DB_PASSWORD must be set}@db:5432/cgp_immo
+      DATABASE_URL_SYNC: postgresql://cgp_admin:${DB_PASSWORD:?DB_PASSWORD must be set}@db:5432/cgp_immo
+      CLAUDE_API_KEY: ${CLAUDE_API_KEY:-}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set in .env}
+      REFRESH_SECRET_KEY: ${REFRESH_SECRET_KEY:?REFRESH_SECRET_KEY must be set in .env}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    expose:
+      - "8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ===========================================
+  # Next.js Frontend
+  # H4 FIX: Non-root user in Dockerfile
+  # ===========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cgp-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${API_URL:-http://localhost:8000}
+    expose:
+      - "3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      - backend
+
+  # ===========================================
+  # Nginx Reverse Proxy
+  # ===========================================
+  nginx:
+    image: nginx:alpine
+    container_name: cgp-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  pgdata:
+    driver: local
